@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Xkil Infinity Database — Dashboard </title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+<style>
+/* ===== Body & background ===== */
+:root{
+  --accent:#ff4444;
+  --accent-2:#c32446;
+  --gold: rgba(212,175,55,0.85);
+  --glass-bg: rgba(255,255,255,0.04);
+  --glass-border: rgba(212,175,55,0.12);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background:
+    radial-gradient(ellipse at top, #080808 0%, #0f0f0f 45%, #050505 100%),
+    linear-gradient(135deg, rgba(12,12,12,0.6), rgba(0,0,0,0.85));
+  color:#e6e6e6;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+}
+.smoke{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(circle at 25% 35%, rgba(255,64,64,0.06), transparent 20%),
+    radial-gradient(circle at 70% 60%, rgba(255,100,100,0.05), transparent 18%),
+    radial-gradient(circle at 50% 20%, rgba(255,200,100,0.03), transparent 18%);
+  animation: smokeMove 12s infinite alternate ease-in-out;
+  filter: blur(18px);
+}
+@keyframes smokeMove{
+  0%{background-position:25% 35%,70% 60%,50% 20%}
+  100%{background-position:23% 38%,72% 58%,52% 22%}
+}
+.sidebar{
+  position:fixed; right:0; top:0; height:100vh; width:300px;
+  transform:translateX(100%); transition:transform .36s cubic-bezier(.2,.9,.3,1);
+  z-index:30; padding:28px; display:flex; flex-direction:column;
+  background:linear-gradient(180deg, rgba(0,0,0,0.8), rgba(12,0,0,0.85));
+  border-left: 1px solid rgba(255,255,255,0.03);
+  box-shadow: -20px 0 60px rgba(0,0,0,0.6);
+}
+.sidebar.open{ transform:translateX(0) }
+.closebtn{ position:absolute; left:14px; top:12px; font-size:28px; color:var(--accent); cursor:pointer; user-select:none}
+.sidebar .user{ font-weight:700; color:var(--accent); margin-bottom:8px}
+.sidebar .last{ color:var(--gold); font-size:13px; margin-bottom:14px}
+.sidebar a{ display:block; padding:10px 12px; margin:6px 0; border-radius:8px; color:#ffb3b3; text-decoration:none; font-weight:600 }
+.sidebar a:hover{ background:rgba(255,0,0,0.06) }
+.menu-btn{
+  position:fixed; right:18px; top:14px; z-index:40; background:rgba(0,0,0,0.5);
+  border-radius:8px; padding:8px 12px; font-size:20px; color:var(--accent); cursor:pointer;
+  box-shadow:0 6px 22px rgba(0,0,0,0.6);
+}
+.container{
+  max-width:540px; margin:72px auto; z-index:10; position:relative; padding:34px;
+  background:var(--glass-bg); border-radius:16px; border:1px solid var(--glass-border);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px) saturate(120%);
+}
+.logo{
+  width:84px; height:84px; border-radius:50%; display:block; margin:0 auto 14px; border:2px solid var(--accent);
+  box-shadow: 0 0 18px rgba(255,68,68,0.12);
+}
+.title{ font-family:'Orbitron',sans-serif; text-align:center; font-size:22px; letter-spacing:1px; color:#fff; margin:8px 0 6px }
+.subtitle{ text-align:center; font-size:13px; color:rgba(255,255,255,0.6); margin-bottom:16px }
+.input, textarea, select{
+  width:100%; padding:12px 14px; margin:8px 0; border-radius:10px; border:1px solid rgba(255,255,255,0.04);
+  background:rgba(255,255,255,0.02); color:#fff; font-size:15px; outline:none;
+}
+.btn{
+  display:inline-block; width:100%; padding:12px; border-radius:10px; background: linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:#fff; border:none; font-weight:700; font-size:15px; cursor:pointer; margin-top:10px;
+  box-shadow:0 8px 30px rgba(195,36,70,0.12);
+}
+.btn.secondary{ background:transparent; border:1px solid rgba(255,255,255,0.06); color:#ffd2d2 }
+.status{
+  margin-top:12px; padding:12px; border-radius:10px; background:rgba(0,0,0,0.45); font-family:monospace;
+  font-size:13px; color:#ffdede; max-height:160px; overflow:auto; white-space:pre-wrap;
+  border-left:4px solid rgba(255,68,68,0.9);
+}
+#toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:26px; z-index:1000; min-width:260px; padding:12px 16px; border-radius:10px; background:var(--accent); color:#fff; font-weight:700; text-align:center; visibility:hidden; opacity:0; transition:all .28s }
+.row{ display:flex; gap:10px }
+.col{ flex:1 }
+.muted{ color:rgba(255,255,255,0.45); font-size:13px }
+.footer{ text-align:center; color:rgba(255,255,255,0.4); font-size:12px; margin-top:12px }
+@media(max-width:640px){
+  .container{ margin:40px 18px; padding:20px }
+  .sidebar{ width:86vw }
+}
+</style>
+</head>
+<body>
+
+<div class="smoke"></div>
+
+<!-- MENU -->
+<div id="menuBtn" class="menu-btn" title="Menu">☰</div>
+
+<!-- Sidebar -->
+<div id="sidebar" class="sidebar" aria-hidden="true">
+  <div class="closebtn" onclick="closeNav()">×</div>
+  <div class="user" id="sidebarUser">Not logged</div>
+  <div class="last" id="lastLogin">—</div>
+
+  <a href="#" onclick="showPanel('panelDashboard')">🏠 Dashboard</a>
+  <a href="#" onclick="showPanel('panelAdd')">➕ Tambah Bot / Token</a>
+  <a href="#" onclick="showPanel('panelSettings')">⚙️ Settings (GitHub)</a>
+  <a href="#" onclick="showPanel('panelLogs')">📜 Activity Log</a>
+  <a href="#" onclick="doLogout()" style="color:#ffd2d2; margin-top:14px; font-weight:700">🚪 Logout</a>
+
+  <div style="flex:1"></div>
+  <div class="muted" style="font-size:12px">© Server Dashboard • design: luxury</div>
+</div>
+
+<!-- MAIN CONTAINER -->
+<div class="container" id="mainCard" role="main" aria-live="polite">
+
+  <!-- LOGIN PANEL -->
+  <div id="panelLogin">
+    <img src="https://files.catbox.moe/sa3j6b.jpg" class="logo" alt="logo">
+    <div class="title">Xkil Database</div>
+    <div class="subtitle">Masuk dulu untuk lanjut.</div>
+
+    <input id="inpUser" class="input" placeholder="Username" autocomplete="off">
+    <input id="inpPass" type="password" class="input" placeholder="Password" autocomplete="off">
+    <button class="btn" onclick="handleLogin()">MASUK</button>
+
+    <div style="display:flex; gap:8px; margin-top:10px">
+      <button class="btn secondary" onclick="openNav()">Buka Menu</button>
+    </div>
+
+    <div id="loginStatus" class="status" style="margin-top:14px">Status: Menunggu login...</div>
+    <div class="footer">© Copyright Ryzzi Mods — Xkil Infinity</div>
+  </div>
+
+  <!-- DASHBOARD PANEL -->
+  <div id="panelDashboard" style="display:none">
+    <img src="https://files.catbox.moe/sa3j6b.jpg" style="width:100%; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.5)" alt="welcome">
+    <h3 style="margin:12px 0 4px; text-align:center">Selamat datang, <span id="displayUser">—</span></h3>
+    <p class="muted" style="text-align:center">Pilih menu di kanan atas untuk mulai.</p>
+
+    <div style="margin-top:12px">
+      <button class="btn secondary" onclick="goBack()">⏪ Exit</button>
+    </div>
+    <div id="panelFooter" class="footer" style="margin-top:18px">© Ryzzi Mods 2025 • Safe mode</div>
+  </div>
+
+  <!-- ADD TOKEN PANEL -->
+  <div id="panelAdd" style="display:none">
+    <div style="display:flex; gap:10px; align-items:center">
+      <img src="https://files.catbox.moe/sa3j6b.jpg" class="logo" style="width:64px;height:64px;margin:0" alt="">
+      <div>
+        <div class="title" style="font-size:18px">Tambah Bot / Token</div>
+      </div>
+    </div>
+
+    <input id="inpToken" class="input" placeholder="Masukkan token bot Telegram (bot...)">
+    <input id="inpBotName" class="input" placeholder="Nama / username bot (opsional)">
+    <input id="inpBotPassword" class="input" placeholder="Password / note (opsional)">
+
+    <div style="display:flex; gap:8px">
+      <button class="btn col" onclick="saveTokenLocal()">Simpan Lokal</button>
+      <button class="btn col secondary" onclick="clearLocalToken()">Hapus Lokal</button>
+    </div>
+    <div id="addStatus" class="status">Status: Menunggu input...</div>
+    <button class="btn secondary" onclick="goBack()">⏪ Exit</button>
+  </div>
+
+  <!-- SETTINGS PANEL -->
+  <div id="panelSettings" style="display:none">
+    <div class="title" style="font-size:16px; margin-bottom:8px">Settings GitHub</div>
+    <input id="githubOwner" class="input" placeholder="GitHub owner (username/org)">
+    <input id="githubRepo" class="input" placeholder="Repository name">
+    <input id="githubPath" class="input" placeholder="Path file JSON di repo">
+    <input id="githubToken" class="input" placeholder="Personal access token (PAT)">
+    <div id="settingsStatus" class="status" style="margin-top:10px">Settings: belum disimpan</div>
+    <button class="btn secondary" onclick="goBack()">⏪ Exit</button>
+  </div>
+
+  <!-- LOGS PANEL -->
+  <div id="panelLogs" style="display:none">
+    <div class="title" style="font-size:16px">Activity Log</div>
+    <div id="activityLog" class="status">—</div>
+    <button class="btn secondary" onclick="goBack()">⏪ Exit</button>
+  </div>
+
+</div>
+
+<div id="toast">Toast</div>
+
+<script>
+let DEFAULT_USERLIST_RAW = "https://raw.githubusercontent.com/alifsolo4/alifsolo/refs/heads/main/xlif.txt";
+let panelHistory = [];
+let currentPanel = 'panelLogin';
+
+function showPanel(id){
+  if(id !== currentPanel){
+    panelHistory.push(currentPanel);
+  }
+  const panels = ['panelLogin','panelDashboard','panelAdd','panelSettings','panelLogs'];
+  panels.forEach(p=>{
+    const el = document.getElementById(p);
+    if(el) el.style.display = (p===id) ? '' : 'none';
+  });
+  currentPanel = id;
+  closeNav();
+}
+function goBack(){
+  if(panelHistory.length > 0){
+    const prev = panelHistory.pop();
+    showPanel(prev);
+  } else {
+    showPanel('panelDashboard');
+  }
+}
+menuBtn.addEventListener('click', ()=>openNav());
+function openNav(){ sidebar.classList.add('open'); sidebar.setAttribute('aria-hidden','false'); }
+function closeNav(){ sidebar.classList.remove('open'); sidebar.setAttribute('aria-hidden','true'); }
+
+async function fetchUserListRaw(url){
+  try{
+    const res = await fetch(url + '?_=' + Date.now());
+    if(!res.ok) throw new Error('Gagal fetch userlist');
+    const text = await res.text();
+    return text.split('\n').map(l=>l.trim()).filter(Boolean).map(line=>{
+      const [u,p] = line.split(':');
+      return { username: u||'', password: p||'' };
+    });
+  }catch(err){ return []; }
+}
+async function handleLogin(){
+  const user = document.getElementById('inpUser').value.trim();
+  const pass = document.getElementById('inpPass').value.trim();
+  if(!user || !pass){ loginStatus.textContent='Isi username & password'; return; }
+
+  // akun Admin Xkil infinity
+  if(user === "Ryzzi" && pass === "Xkilvip"){
+    loginStatus.textContent = 'Login berhasil dengan akun Admin.';
+    saveToStore('sc_user',{username:user,loginAt:new Date().toString()});
+    updateUIAfterLogin(user);
+    showPanel('panelDashboard');
+    return;
+  }
+
+  const users = await fetchUserListRaw(DEFAULT_USERLIST_RAW);
+  const found = users.find(x => x.username===user && x.password===pass);
+  if(!found){ loginStatus.textContent='Login gagal'; return; }
+
+  loginStatus.textContent='Login berhasil.';
+  saveToStore('sc_user',{username:user,loginAt:new Date().toString()});
+  updateUIAfterLogin(user);
+  showPanel('panelDashboard');
+}
+function updateUIAfterLogin(username){
+  sidebarUser.textContent = `Login: ${username}`;
+  displayUser.textContent = username;
+  lastLogin.textContent = `Terakhir: ${new Date().toLocaleString()}`;
+  menuBtn.style.display='';
+}
+function saveToStore(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+function loadFromStore(k,def=null){ try{ const s=localStorage.getItem(k); return s? JSON.parse(s): def; }catch(e){return def} }
+function doLogout(){ localStorage.removeItem('sc_user'); menuBtn.style.display='none'; sidebarUser.textContent='Not logged'; showPanel('panelLogin'); }
+function init(){ const su=loadFromStore('sc_user',{}); if(su && su.username){ updateUIAfterLogin(su.username);} else { menuBtn.style.display='none'; } }
+init();
+</script>
+
+</body>
+</html>
+
